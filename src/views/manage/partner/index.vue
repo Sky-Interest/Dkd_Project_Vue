@@ -1,13 +1,8 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="90px">
       <el-form-item label="合作商名称" prop="partnerName">
-        <el-input
-          v-model="queryParams.partnerName"
-          placeholder="请输入合作商名称"
-          clearable
-          @keyup.enter="handleQuery"
-        />
+        <el-input v-model="queryParams.partnerName" placeholder="请输入合作商名称" clearable @keyup.enter="handleQuery" />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
@@ -17,73 +12,54 @@
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="Plus"
-          @click="handleAdd"
-          v-hasPermi="['manage:partner:add']"
-        >新增</el-button>
+        <el-button type="primary" plain icon="Plus" @click="handleAdd"
+          v-hasPermi="['manage:partner:add']">新增</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="Edit"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['manage:partner:edit']"
-        >修改</el-button>
+        <el-button type="success" plain icon="Edit" :disabled="single" @click="handleUpdate"
+          v-hasPermi="['manage:partner:edit']">修改</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="Delete"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['manage:partner:remove']"
-        >删除</el-button>
+        <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete"
+          v-hasPermi="['manage:partner:remove']">删除</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="Download"
-          @click="handleExport"
-          v-hasPermi="['manage:partner:export']"
-        >导出</el-button>
+        <el-button type="warning" plain icon="Download" @click="handleExport"
+          v-hasPermi="['manage:partner:export']">导出</el-button>
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
     <el-table v-loading="loading" :data="partnerList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键id" align="center" prop="id" />
+      <el-table-column label="序号" type="index" width="50px" align="center" prop="id" />
       <el-table-column label="合作商名称" align="center" prop="partnerName" />
+      <el-table-column label="账号" align="center" prop="account" />
+      <el-table-column label="分成比例" align="center" prop="profitRatio">
+        <template #default="scope">
+          {{ scope.row.profitRatio + '%' }}
+        </template>
+      </el-table-column>
       <el-table-column label="联系人" align="center" prop="contactPerson" />
       <el-table-column label="联系电话" align="center" prop="contactPhone" />
-      <el-table-column label="分成比例" align="center" prop="profitRatio" />
-      <el-table-column label="账号" align="center" prop="account" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['manage:partner:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['manage:partner:remove']">删除</el-button>
+          <el-button link type="primary" @click="getPartnerInfo(scope.row)"
+            v-hasPermi="['manage:partner:query']">查看详情</el-button>
+          <el-button link type="primary" @click="handleUpdate(scope.row)"
+            v-hasPermi="['manage:partner:edit']">修改</el-button>
+          <el-button link type="primary" @click="handleDelete(scope.row)"
+            v-hasPermi="['manage:partner:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
-    <pagination
-      v-show="total>0"
-      :total="total"
-      v-model:page="queryParams.pageNum"
-      v-model:limit="queryParams.pageSize"
-      @pagination="getList"
-    />
+
+    <pagination v-show="total>0" :total="total" v-model:page="queryParams.pageNum" v-model:limit="queryParams.pageSize"
+      @pagination="getList" />
 
     <!-- 添加或修改合作商管理对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="partnerRef" :model="form" :rules="rules" label-width="80px">
+      <el-form ref="partnerRef" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="合作商名称" prop="partnerName">
           <el-input v-model="form.partnerName" placeholder="请输入合作商名称" />
         </el-form-item>
@@ -93,14 +69,19 @@
         <el-form-item label="联系电话" prop="contactPhone">
           <el-input v-model="form.contactPhone" placeholder="请输入联系电话" />
         </el-form-item>
+
+        <el-form-item label="创建时间" prop="createTime" v-if="form.id != null">
+          {{ form.createTime }}
+        </el-form-item>
+
         <el-form-item label="分成比例" prop="profitRatio">
           <el-input v-model="form.profitRatio" placeholder="请输入分成比例" />
         </el-form-item>
-        <el-form-item label="账号" prop="account">
+        <el-form-item label="账号" prop="account" v-if="form.id == null">
           <el-input v-model="form.account" placeholder="请输入账号" />
         </el-form-item>
-        <el-form-item label="密码" prop="password">
-          <el-input v-model="form.password" placeholder="请输入密码" />
+        <el-form-item label="密码" prop="password" v-if="form.id == null">
+          <el-input v-model="form.password" type="password" placeholder="请输入密码" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -109,6 +90,17 @@
           <el-button @click="cancel">取 消</el-button>
         </div>
       </template>
+    </el-dialog>
+
+    <!-- 查看合作商详情对话框 -->
+    <el-dialog title="合作商详情" v-model="partnerInfoOpen" width="500px" append-to-body>
+      <!-- 使用el-descriptions组件以卡片形式展示信息，更加整洁 -->
+      <el-descriptions :column="2" border>
+        <el-descriptions-item label="合作商名称">{{ form.partnerName }}</el-descriptions-item>
+        <el-descriptions-item label="联系人">{{ form.contactPerson }}</el-descriptions-item>
+        <el-descriptions-item label="联系电话">{{ form.contactPhone }}</el-descriptions-item>
+        <el-descriptions-item label="分成比例">{{ form.profitRatio }}%</el-descriptions-item>
+      </el-descriptions>
     </el-dialog>
   </div>
 </template>
@@ -228,6 +220,17 @@ function handleUpdate(row) {
     form.value = response.data;
     open.value = true;
     title.value = "修改合作商管理";
+  });
+}
+/** 查看合作商详情 */
+const partnerInfoOpen = ref(false);
+function getPartnerInfo(row) {
+  reset();
+  const _id = row.id 
+  getPartner(_id).then(response => {
+    form.value = response.data;
+    partnerInfoOpen.value = true;
+    
   });
 }
 
