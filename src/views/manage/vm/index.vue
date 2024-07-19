@@ -40,7 +40,7 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="详细地址" align="center" prop="addr" />
+      <el-table-column label="详细地址" align="left" prop="addr" show-overflow-tooltip="true" />
       <el-table-column label="合作商" align="center" prop="partnerId">
         <template #default="scope">
           <div v-for="item in partnerList" :key="item.id">
@@ -64,55 +64,55 @@
       @pagination="getList" />
 
     <!-- 添加或修改设备管理对话框 -->
-    <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="vmRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="设备编号" prop="innerCode">
-          <span>{{ form.innerCode == null? '系统自动生成' :form.innerCode}}</span>
-        </el-form-item>
-        <el-form-item label="供货时间" v-if="form.innerCode != null">
-          <span> {{ parseTime(form.lastSupplyTime,'{y}-{m}-{d} {h}:{i}:{s}') }}</span>
-        </el-form-item>
-        <el-form-item label="设备类型" v-if="form.innerCode != null">
-          <div v-for="item in vmTypeList" :key="item.id">
-            <span v-if="item.id == form.vmTypeId">{{ item.name }}</span>
-          </div>
-        </el-form-item>
-        <el-form-item label="设备容量" v-if="form.innerCode != null">
-          <span> {{ form.channelMaxCapacity }}</span>
-        </el-form-item>
-        <el-form-item label="选择型号" prop="vmTypeId" v-if="form.innerCode == null">
-          <!-- <el-input v-model="form.vmTypeId" placeholder="请输入设备型号" /> -->
-          <el-select v-model="form.vmTypeId" placeholder="请选择设备型号">
-            <el-option v-for="item in vmTypeList" :key="item.id" :label="item.name" :value="item.id" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="选择点位" prop="nodeId" >
-          <!-- <el-input v-model="form.nodeId" placeholder="请输入点位Id" /> -->
-          <el-select v-model="form.nodeId" placeholder="请选择点位">
-            <el-option v-for="item in nodeList" :key="item.id" :label="item.nodeName" :value="item.id" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="合作商" v-if="form.innerCode != null">
-          <div v-for="item in partnerList" :key="item.id">
-            <span v-if="item.id == form.partnerId">{{ item.partnerName }}</span>
-          </div>
-        </el-form-item>
-        <el-form-item label="所属区域" v-if="form.innerCode != null">
-          <div v-for="item in regionList" :key="item.id">
-            <span v-if="item.id == form.regionId">{{ item.regionName }}</span>
-          </div>
-        </el-form-item>
-        <el-form-item label="设备地址" v-if="form.innerCode != null">
-          <span>{{ form.addr }}</span>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button type="primary" @click="submitForm">确 定</el-button>
-          <el-button @click="cancel">取 消</el-button>
-        </div>
-      </template>
-    </el-dialog>
+<el-dialog :title="title" v-model="open" width="500px" append-to-body>
+  <el-form ref="vmRef" :model="form" :rules="rules" label-width="80px">
+    <el-form-item label="设备编号">
+      <span>{{ form.innerCode == null ? '系统自动生成' : form.innerCode }}</span>
+    </el-form-item>
+    <el-form-item label="供货时间" v-if="form.innerCode != null">
+      <span>{{ parseTime(form.lastSupplyTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+    </el-form-item>
+    <el-form-item label="设备类型" v-if="form.innerCode != null">
+      <div v-for="item in vmTypeList" :key="item.id">
+        <span v-if="form.vmTypeId == item.id">{{ item.name }}</span>
+      </div>
+    </el-form-item>
+    <el-form-item label="设备容量" v-if="form.innerCode != null">
+      <span>{{ form.channelMaxCapacity }}</span>
+    </el-form-item>
+    <el-form-item label="选择型号" prop="vmTypeId" v-if="form.innerCode == null">
+      <!-- <el-input v-model="form.vmTypeId" placeholder="请输入设备型号" /> -->
+      <el-select v-model="form.vmTypeId" placeholder="请选择设备型号" style="width: 100%">
+        <el-option v-for="item in vmTypeList" :key="item.id" :label="item.name" :value="item.id" />
+      </el-select>
+    </el-form-item>
+    <el-form-item label="选择点位" prop="nodeId">
+      <!-- <el-input v-model="form.nodeId" placeholder="请输入点位Id" /> -->
+      <el-select v-model="form.nodeId" placeholder="请选择点位" style="width: 100%">
+        <el-option v-for="item in nodeList" :key="item.id" :label="item.nodeName" :value="item.id" />
+      </el-select>
+    </el-form-item>
+    <el-form-item label="合作商" v-if="form.innerCode != null">
+      <div v-for="item in partnerList" :key="item.id">
+        <span v-if="form.partnerId == item.id">{{ item.partnerName }}</span>
+      </div>
+    </el-form-item>
+    <el-form-item label="所属区域" v-if="form.innerCode != null">
+      <div v-for="item in regionList" :key="item.id">
+        <span v-if="form.regionId == item.id">{{ item.regionName }}</span>
+      </div>
+    </el-form-item>
+    <el-form-item label="设备地址" v-if="form.innerCode != null">
+        <span>{{ form.addr }}</span>
+    </el-form-item>
+  </el-form>
+  <template #footer>
+    <div class="dialog-footer">
+      <el-button type="primary" @click="submitForm">确 定</el-button>
+      <el-button @click="cancel">取 消</el-button>
+    </div>
+  </template>
+</el-dialog>
   </div>
 </template>
 
@@ -282,10 +282,10 @@ function handleExport() {
   }, `vm_${new Date().getTime()}.xlsx`)
 }
 
-/* 查询设别类型列表 */
+/* 查询设备类型列表 */
 const vmTypeList = ref([]);
 function getVmTypeList() {
-  listVmType(loadAllParams).then(response => {
+  listVmType(loadAllParams).then((response) => {
     vmTypeList.value = response.rows;
   });
 }

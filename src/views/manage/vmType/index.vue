@@ -101,8 +101,8 @@
           <el-input-number :min="1" :max="10" v-model="form.vmCol" placeholder="请输入货道列" />列
         </el-form-item>
         
-        <el-form-item label="设备容量" prop="channelMaxCapacity">
-          <el-input-number v-model="form.channelMaxCapacity" :min="1" :max="10" placeholder="请输入设备容量" />
+        <el-form-item label="货道容量" prop="channelMaxCapacity">
+          <el-input-number v-model="form.channelMaxCapacity" :min="1" :max="10" placeholder="请输入货道容量" />个
         </el-form-item>
         <el-form-item label="设备图片" prop="image">
           <image-upload v-model="form.image"/>
