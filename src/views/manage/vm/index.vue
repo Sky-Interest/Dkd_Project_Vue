@@ -55,6 +55,7 @@
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
+          <el-button link type="primary" @click="handleUpdatePolicy(scope.row)" v-hasPermi="['manage:vm:edit']">策略</el-button>
           <el-button link type="primary" @click="handleUpdate(scope.row)" v-hasPermi="['manage:vm:edit']">修改</el-button>
         </template>
       </el-table-column>
@@ -113,6 +114,27 @@
     </div>
   </template>
 </el-dialog>
+    <!-- 策略管理对话框 -->
+     <el-dialog title="策略管理" v-model="policyOpen" width="500px" append-to-body>
+      <el-form ref="vmRef" :model="form"  label-width="80px">
+        <el-form-item label="选择策略" prop="policyId">
+          <el-select v-model="form.policyId" placeholder="请选择策略">
+            <el-option 
+            v-for="item in policyList" 
+            :key="item.policyId" 
+            :label="item.policyName" 
+            :value="item.policyId" 
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+    <div class="dialog-footer">
+      <el-button type="primary" @click="submitForm">确 定</el-button>
+      <el-button @click="cancel">取 消</el-button>
+    </div>
+  </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -124,6 +146,7 @@ import { loadAllParams} from "@/api/page";
 import { listNode } from "@/api/manage/node";
 import {listRegion} from "@/api/manage/region";
 import { get } from "@vueuse/core";
+import { listPolicy } from "@/api/manage/policy";
 
 const { proxy } = getCurrentInstance();
 const { vm_status } = proxy.useDict('vm_status');
@@ -178,6 +201,7 @@ function getList() {
 // 取消按钮
 function cancel() {
   open.value = false;
+  policyOpen.value = false;//关闭策略选择对话框
   reset();
 }
 
@@ -243,6 +267,20 @@ function handleUpdate(row) {
   });
 }
 
+/** 设备策略分配 */
+const policyOpen = ref(false);
+const policyList = ref([]);
+function handleUpdatePolicy(row){
+  //1.为表单复赋值设备id和策略id
+  form.value.id = row.id;
+  form.value.policyId = row.policyId;
+  //2.查询策略列表
+  listPolicy(loadAllParams).then(response => {
+    policyList.value = response.rows;
+    policyOpen.value = true;
+  });
+}
+
 /** 提交按钮 */
 function submitForm() {
   proxy.$refs["vmRef"].validate(valid => {
@@ -251,6 +289,7 @@ function submitForm() {
         updateVm(form.value).then(response => {
           proxy.$modal.msgSuccess("修改成功");
           open.value = false;
+          policyOpen.value = false;//关闭策略对话框
           getList();
         });
       } else {
